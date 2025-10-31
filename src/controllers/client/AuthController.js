@@ -55,7 +55,7 @@ class AuthController {
         try {
             const data = jwt.verify(token, process.env.KEY_JWT);
             const tmp = data.email;
-
+            // console.log(tmp)
             if (await mCustomer.setActiveStatus(tmp)) {
                 req.session.message = {
                     mess: `Kích hoạt tài khoản thành công, bạn có thể đăng nhập ngay bây giờ`,
@@ -101,6 +101,9 @@ class AuthController {
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(data.password, salt);
         data.password = hash;
+        data.status = 0;
+        data.name = data.nfirst + " " + data.nlast;
+
 
         if (await mCustomer.findByEmail(data.email)) {
             req.session.message = {
@@ -157,7 +160,7 @@ class AuthController {
         console.log(data)
 
         const user = await mCustomer.findByEmail(data.email);
-        console.log(user)
+        // console.log(user)
         if (!user) {
             req.session.message = {
                 mess: `Username không tồn tại`,
@@ -422,6 +425,7 @@ class AuthController {
             const tmp = data.email;
 
             const user = await mCustomer.findByEmail(tmp);
+            console.log(tmp)
             if (!user) {
                 req.session.message = {
                     mess: `Email không tồn tại trong hệ thống`,

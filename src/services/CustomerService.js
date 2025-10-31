@@ -1,26 +1,34 @@
-const customer = require('../models/customer');
+// const customer = require('../models/nguoidung');
 const pool = require('../database/client');
 const bcrypt = require('bcrypt');
+const nguoidung = require('../models/nguoidung');
 
 
 class CustomerService {
     getAll = async (cond = null) => {
         try {
-            let query = `SELECT * FROM user`;
+            let query = `SELECT * FROM nguoidung`;
             if (cond) {
                 query += cond;
             }
 
             const [result, fields] = await pool.execute(query);
             return result.map(row => {
-                return new customer(
-                    row.id,
-                    row.username,
-                    row.password,
-                    row.email,
+                return new nguoidung(
+                    row.MaNguoiDung,
+                    row.HoTen,
+                    row.NgaySinh,
                     row.CCCD,
-                    row.status,
-                    row.name
+                    row.Username,
+                    row.Password,
+                    row.ThongTinLienHe,
+                    row.DiaChi,
+                    row.SDT,
+                    row.QuocTich,
+                    row.Rating,
+                    row.Discriminator,
+                    row.Email,
+                    row.status
                 );
             });
         } catch (err) {
@@ -30,7 +38,7 @@ class CustomerService {
     }
     // tìm kiếm tất cả khách hàng với điều kiện
     find = async (id) => {
-        const cond = ` WHERE id = ${id}`;
+        const cond = ` WHERE MaNguoiDung = ${id}`;
         const tmp = await this.getAll(cond);
         if (tmp.length == 0) {
             return null;
@@ -41,7 +49,7 @@ class CustomerService {
 
     // tìm khách hàng theo email
     findByEmail = async (email) => {
-        const cond = ` WHERE \`email\` = '${email}'`;
+        const cond = ` WHERE \`Email\` = '${email}'`;
         const tmp = await this.getAll(cond);
         if (tmp.length == 0) {
             return false;
@@ -50,9 +58,9 @@ class CustomerService {
         return customerItem;
     }
 
-    // tìm khách hàng theo username
-    findByUsername = async (username) => {
-        const cond = ` WHERE \`username\` = '${username}'`;
+    // tìm khách hàng theo nguoidungname
+    findByUsername = async (nguoidungname) => {
+        const cond = ` WHERE \`Username\` = '${nguoidungname}'`;
         const tmp = await this.getAll(cond);
         if (tmp.length == 0) {
             return false;
@@ -63,22 +71,22 @@ class CustomerService {
 
     // thêm mới khách hàng
     save = async (customerData) => {
-        // console.log(customerData);
-        // const query = ;
-        // const values = [
-        //     customerData.name,//
-        //     customerData.status,//
-        //     customerData.password,//
-        //     customerData.username//
-        // ];
-        // console.log(values)
+
         try {
-            const [result] = await pool.execute(`INSERT INTO user (name, username, password, email, status, CCCD) VALUES (?, ?, ?, ?, ?, ?)`, [customerData.name,
-            customerData.username,
-            customerData.password,
-            customerData.email,
-            customerData.status,
-                '123123123123123'
+            const [result] = await pool.execute(`INSERT INTO nguoidung (HoTen, NgaySinh, CCCD, Username, Password, ThongTinLienHe, DiaChi, SDT, QuocTich, Rating, Discriminator, Email , status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)`, [
+                customerData.name,
+                customerData.birthday || null,
+                customerData.cccd || null,
+                customerData.username,
+                customerData.password,
+                customerData.information || null,
+                customerData.address || null,
+                customerData.phone || null,
+                customerData.country || null,
+                customerData.rating || null,
+                customerData.discriminator || null,
+                customerData.email,
+                customerData.status || 0
             ]);
             return result.insertId;;
         } catch (err) {
@@ -89,9 +97,11 @@ class CustomerService {
 
     // kích hoạt tài khoản
     setActiveStatus = async (email) => {
-        const query = `UPDATE user SET status = 1 WHERE email = ?`;
+        // console.log(email);
+        const query = `UPDATE nguoidung SET status = 1 WHERE Email = ?`;
         try {
             const [result] = await pool.execute(query, [email]);
+
             return result.affectedRows > 0;
         } catch (err) {
             console.error(err);
@@ -105,7 +115,7 @@ class CustomerService {
     // cập nhật thông tin khách hàng
     // update = async (customerData) => {
     //     // console.log(customerData);
-    //     const query = `UPDATE customer SET name = ?, phone = ?, email = ?, ward_id = ?, status = ?, housenumber_street = ?, shipping_name = ?, shipping_mobile = ?, password = ?, username = ? WHERE id = ?`;
+    //     const query = `UPDATE customer SET name = ?, phone = ?, email = ?, ward_id = ?, status = ?, housenumber_street = ?, shipping_name = ?, shipping_mobile = ?, password = ?, nguoidungname = ? WHERE id = ?`;
     //     const values = [
     //         customerData.name,
     //         customerData.phone,
@@ -116,7 +126,7 @@ class CustomerService {
     //         customerData.shipping_name,
     //         customerData.shipping_mobile,
     //         customerData.password,
-    //         customerData.username,
+    //         customerData.nguoidungname,
     //         customerData.id
     //     ];
     //     try {

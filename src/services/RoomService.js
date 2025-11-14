@@ -1,23 +1,39 @@
-const Phong = require("../models/phong");
+const Phong = require('../models/phong');
 const pool = require('../database/client');
 
 class RoomService {
-    getAll = async (cond = null) => {
+    getAll = async (cond = '', params = []) => {
         try {
             let query = `
-                SELECT 
-                    p.MaPhong, p.SoPhong, p.ViTriTang, p.TrangThaiPhong, p.MaLoaiPhong, 
-                    p.View, p.DiaChi, p.Rating, p.MoTa, p.HinhAnh, p.MaThietBi,
-                    lp.TenLoaiPhong, lp.Gia
-                FROM phong p\
+                SELECT
+                    p.MaPhong,
+                    p.SoPhong,
+                    p.ViTriTang,
+                    p.TrangThaiPhong,
+                    p.MaLoaiPhong,
+                    p.View,
+                    p.DiaChi,
+                    p.Rating,
+                    p.MoTa,
+                    p.HinhAnh,
+                    p.MaThietBi,
+                    p.gia AS GiaPhong,
+                    lp.TenLoaiPhong,
+                    lp.Gia AS GiaLoaiPhong
+                FROM phong p
                 JOIN loaiphong lp ON p.MaLoaiPhong = lp.MaLoaiPhong
             `;
+
             if (cond) {
-                query += " " + cond;
+                query += ` ${cond}`;
             }
 
-            const [result, fields] = await pool.execute(query);
-            return result.map(row => {
+            if (!/order by/i.test(cond || '')) {
+                query += ' ORDER BY p.MaPhong DESC';
+            }
+
+            const [result] = await pool.execute(query, params);
+            return result.map((row) => {
                 const room = new Phong(
                     row.MaPhong,
                     row.SoPhong,
@@ -31,32 +47,47 @@ class RoomService {
                     row.HinhAnh,
                     row.MaThietBi
                 );
-                // Add TenLoaiPhong and Gia from the joined loaiphong table
+
                 room.TenLoaiPhong = row.TenLoaiPhong;
-                room.Gia = row.Gia;
+                room.Gia = row.GiaPhong ?? row.GiaLoaiPhong ?? null;
                 return room;
             });
         } catch (err) {
             console.error(err);
             return [];
         }
-    }
+    };
 
     findById = async (id) => {
-        const cond = ` WHERE MaPhong = ${id}`;
+        const rooms = await this.getAll('WHERE p.MaPhong = ?', [id]);
+        return rooms.length ? rooms[0] : null;
+    };
 
-        const tmp = await this.getAll(cond);
+    create = async (data) => {
+        const query = `
+            INSERT INTO phong
+                (SoPhong, ViTriTang, TrangThaiPhong, MaLoaiPhong, View, DiaChi, Rating, gia, MoTa, HinhAnh, MaThietBi)
+            VALUES
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
 
-        if (tmp.length == 0) {
-            return null;
-        }
+        const params = [
+            data.SoPhong,
+            data.ViTriTang ?? null,
+            data.TrangThaiPhong ?? 'Trống',
+            data.MaLoaiPhong,
+            data.View ?? null,
+            data.DiaChi ?? null,
+            data.Rating ?? null,
+            data.Gia ?? null,
+            data.MoTa ?? null,
+            data.HinhAnh ?? null,
+            data.MaThietBi ?? null,
+        ];
 
-
-        const roomItem = tmp[0];
-        return roomItem;
-    }
-
-
+        const [result] = await pool.execute(query, params);
+        return result.insertId;
+    };
 }
 
 module.exports = RoomService;

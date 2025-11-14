@@ -1,8 +1,6 @@
-// const customer = require('../models/nguoidung');
 const pool = require('../database/client');
 const bcrypt = require('bcrypt');
 const nguoidung = require('../models/nguoidung');
-
 
 class CustomerService {
     getAll = async (cond = null) => {

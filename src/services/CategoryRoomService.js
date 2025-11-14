@@ -1,7 +1,6 @@
 const loaiphong = require("../models/loaiphong");
 const pool = require('../database/client');
 
-
 class CategoryRoomService {
     getAll = async (cond = null) => {
         try {

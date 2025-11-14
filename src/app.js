@@ -21,7 +21,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 // Set up session
 app.use(session({
     store: new FileStore({}),
-    secret: 'phattrienungdunghihi',
+    secret: process.env.SESSION_SECRET || 'phattrienungdunghihi',
     resave: false,
     saveUninitialized: false,
 
@@ -68,7 +68,7 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // parse application/json
 app.use(bodyParser.json());

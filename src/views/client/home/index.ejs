@@ -4,45 +4,56 @@
     <header class="section-head with-action">
       <div>
         <h2>Những Loại Nơi Lưu Trú</h2>
-        <p class="section-subtitle">Khám phá và quản lý danh sách phòng đang có trên TripStay.</p>
+        <p class="section-subtitle">Khám phá và quản lý danh sách phòng đang có
+          trên TripStay.</p>
       </div>
-      <a class="btn primary" href="/rooms/add">+ Thêm phòng</a>
     </header>
 
     <% if (message) { %>
-      <div class="alert <%= message.type %>">
-        <span class="alert-icon"><%= message.type === 'success' ? '✅' : '⚠️' %></span>
-        <span><%= message.mess %></span>
-      </div>
+    <div class="alert <%= message.type %>">
+      <span class="alert-icon"><%= message.type === 'success' ? '✅' : '⚠️'
+        %></span>
+      <span><%= message.mess %></span>
+    </div>
     <% } %>
 
     <div class="controls-center">
       <div class="controls">
-        <button class="btn filter-btn active" data-filter="Tất cả">Tất cả</button>
+        <button class="btn filter-btn active" data-filter="Tất cả">Tất
+          cả</button>
         <% roomTypes.forEach(type => { %>
-          <button class="btn filter-btn" data-filter="<%= type.TenLoaiPhong %>"><%= type.TenLoaiPhong %></button>
+        <button class="btn filter-btn"
+          data-filter="<%= type.TenLoaiPhong %>"><%= type.TenLoaiPhong
+          %></button>
         <% }); %>
       </div>
     </div>
 
     <div class="row" id="room-list">
       <% if (rooms.length === 0) { %>
-        <p class="empty-state">Hiện chưa có phòng nào trong hệ thống. Hãy thêm phòng đầu tiên của bạn!</p>
+      <p class="empty-state">Hiện chưa có phòng nào trong hệ thống. Hãy thêm
+        phòng đầu tiên của bạn!</p>
       <% } %>
       <% rooms.forEach(room => { %>
-        <article class="card" data-type="<%= room.TenLoaiPhong %>">
-          <div class="thumb">
-            <img src="<%= room.HinhAnh ? room.HinhAnh : '/image/logo.ico' %>" alt="<%= room.TenLoaiPhong %>">
-            <span class="badge">Được khách yêu thích</span>
-            <span class="wish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6">
-                <path d="M12 21s-7-4.73-9.33-7.06a5.5 5.5 0 1 1 7.78-7.78L12 5.72l1.55-1.56a5.5 5.5 0 1 1 7.78 7.78C19 16.27 12 21 12 21Z" />
-              </svg></span>
-          </div>
-          <div class="card-body">
-            <h3 class="title"><%= room.TenLoaiPhong %> tại <%= room.DiaChi || 'Đang cập nhật' %></h3>
-            <div class="meta">₫<%= helpers.formatMoney(room.Gia || 0) %> cho 2 đêm · ★ <%= (room.Rating !== null && room.Rating !== undefined && room.Rating !== '') ? room.Rating : 'Chưa có' %></div>
-          </div>
-        </article>
+      <article class="card" data-type="<%= room.TenLoaiPhong %>">
+        <div class="thumb">
+          <img src="<%= room.HinhAnh ? room.HinhAnh : '/image/logo.ico' %>"
+            alt="<%= room.TenLoaiPhong %>">
+          <span class="badge">Được khách yêu thích</span>
+          <span class="wish"><svg width="18" height="18" viewBox="0 0 24 24"
+              fill="none" stroke="#111827" stroke-width="1.6">
+              <path
+                d="M12 21s-7-4.73-9.33-7.06a5.5 5.5 0 1 1 7.78-7.78L12 5.72l1.55-1.56a5.5 5.5 0 1 1 7.78 7.78C19 16.27 12 21 12 21Z" />
+            </svg></span>
+        </div>
+        <div class="card-body">
+          <h3 class="title"><%= room.TenLoaiPhong %> tại <%= room.DiaChi ||
+            'Đang cập nhật' %></h3>
+          <div class="meta">₫<%= helpers.formatMoney(room.Gia || 0) %> cho 2 đêm
+            · ★ <%= (room.Rating !== null && room.Rating !== undefined &&
+            room.Rating !== '') ? room.Rating : 'Chưa có' %></div>
+        </div>
+      </article>
       <% }); %>
     </div>
     <script>

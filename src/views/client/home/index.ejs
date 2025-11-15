@@ -1,84 +1,123 @@
 <%- include('../layout/header.ejs') %>
-<main>
+
+<main class="page-room-list">
   <section class="container section">
+    <!-- Tiêu đề + nút thêm phòng -->
     <header class="section-head with-action">
       <div>
         <h2>Những Loại Nơi Lưu Trú</h2>
-        <p class="section-subtitle">Khám phá và quản lý danh sách phòng đang có
-          trên TripStay.</p>
+        <p class="section-subtitle">
+          Khám phá và quản lý danh sách phòng đang có trên TripStay.
+        </p>
       </div>
+
+      <!-- <a class="btn primary" href="/rooms/add">+ Thêm phòng mới</a> -->
     </header>
 
+    <!-- Thông báo flash -->
     <% if (message) { %>
     <div class="alert <%= message.type %>">
-      <span class="alert-icon"><%= message.type === 'success' ? '✅' : '⚠️'
-        %></span>
+      <span class="alert-icon">
+        <%= message.type === 'success' ? '✅' : '⚠️' %>
+      </span>
       <span><%= message.mess %></span>
     </div>
     <% } %>
 
+    <!-- Bộ lọc theo loại phòng -->
+    <% if (roomTypes && roomTypes.length > 0) { %>
     <div class="controls-center">
       <div class="controls">
-        <button class="btn filter-btn active" data-filter="Tất cả">Tất
-          cả</button>
+        <button class="btn filter-btn active" data-filter="Tất cả">
+          Tất cả
+        </button>
+
         <% roomTypes.forEach(type => { %>
-        <button class="btn filter-btn"
-          data-filter="<%= type.TenLoaiPhong %>"><%= type.TenLoaiPhong
-          %></button>
+        <button
+          class="btn filter-btn"
+          data-filter="<%= type.TenLoaiPhong %>">
+          <%= type.TenLoaiPhong %>
+        </button>
         <% }); %>
       </div>
     </div>
+    <% } %>
 
+    <!-- Danh sách phòng -->
     <div class="row" id="room-list">
-      <% if (rooms.length === 0) { %>
-      <p class="empty-state">Hiện chưa có phòng nào trong hệ thống. Hãy thêm
-        phòng đầu tiên của bạn!</p>
-      <% } %>
+      <% if (!rooms || rooms.length === 0) { %>
+      <p class="empty-state">
+        Hiện chưa có phòng nào trong hệ thống. Hãy thêm phòng đầu tiên của bạn!
+      </p>
+      <% } else { %>
       <% rooms.forEach(room => { %>
       <article class="card" data-type="<%= room.TenLoaiPhong %>">
         <div class="thumb">
-          <img src="<%= room.HinhAnh ? room.HinhAnh : '/image/logo.ico' %>"
-            alt="<%= room.TenLoaiPhong %>">
+          <img
+            src="<%= room.HinhAnh ? room.HinhAnh : '/image/logo.ico' %>"
+            alt="<%= room.TenLoaiPhong || 'Phòng' %>">
+
           <span class="badge">Được khách yêu thích</span>
-          <span class="wish"><svg width="18" height="18" viewBox="0 0 24 24"
+
+          <span class="wish">
+            <svg width="18" height="18" viewBox="0 0 24 24"
               fill="none" stroke="#111827" stroke-width="1.6">
               <path
                 d="M12 21s-7-4.73-9.33-7.06a5.5 5.5 0 1 1 7.78-7.78L12 5.72l1.55-1.56a5.5 5.5 0 1 1 7.78 7.78C19 16.27 12 21 12 21Z" />
-            </svg></span>
+            </svg>
+          </span>
         </div>
+
         <div class="card-body">
-          <h3 class="title"><%= room.TenLoaiPhong %> tại <%= room.DiaChi ||
-            'Đang cập nhật' %></h3>
-          <div class="meta">₫<%= helpers.formatMoney(room.Gia || 0) %> cho 2 đêm
-            · ★ <%= (room.Rating !== null && room.Rating !== undefined &&
-            room.Rating !== '') ? room.Rating : 'Chưa có' %></div>
+          <h3 class="title">
+            <%= room.TenLoaiPhong || 'Loại phòng' %>
+            tại <%= room.DiaChi || 'Đang cập nhật' %>
+          </h3>
+
+          <div class="meta">
+            <%= helpers.formatMoney(room.Gia || 0) %>đ cho 1 ngày
+            · ★
+            <%= (room.Rating !== null &&
+            room.Rating !== undefined &&
+            room.Rating !== '')
+            ? room.Rating
+            : 'Chưa có' %>
+          </div>
         </div>
       </article>
       <% }); %>
+      <% } %>
     </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const roomCards = document.querySelectorAll('#room-list .card');
+  </section>
 
-        filterButtons.forEach(button => {
-          button.addEventListener('click', () => {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
+  <!-- Script filter theo loại phòng -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      const roomCards = document.querySelectorAll('#room-list .card');
 
-            const filter = button.getAttribute('data-filter');
+      if (!filterButtons.length || !roomCards.length) return;
 
-            roomCards.forEach(card => {
-              if (filter === 'Tất cả' || card.getAttribute('data-type') === filter) {
-                card.style.display = 'flex';
-              } else {
-                card.style.display = 'none';
-              }
-            });
+      filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // active state button
+          filterButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+
+          const filter = button.getAttribute('data-filter');
+
+          roomCards.forEach(card => {
+            const type = card.getAttribute('data-type') || '';
+            if (filter === 'Tất cả' || type === filter) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
           });
         });
       });
-    </script>
-  </section>
+    });
+  </script>
 </main>
+
 <%- include('../layout/footer.ejs') %>

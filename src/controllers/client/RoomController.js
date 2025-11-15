@@ -4,7 +4,53 @@ const CategoryRoomService = require('../../services/CategoryRoomService');
 const RoomService = require('../../services/RoomService');
 
 class RoomController {
-    static createView = async (req, res) => {
+    // =============== TRANG DANH SÁCH PHÒNG ===============
+    static async index(req, res) {
+        const message = req.session.message;
+        delete req.session.message;
+
+        try {
+            const categoryRoomService = new CategoryRoomService();
+            const roomService = new RoomService();
+
+            const [roomTypes, rooms] = await Promise.all([
+                categoryRoomService.getAll(), // loại phòng cho filter
+                roomService.getAll(),         // danh sách phòng
+            ]);
+
+            res.render('client/home/list-room', {
+                message,
+                roomTypes,
+                rooms,
+                helpers: {
+                    formatMoney: (value) =>
+                        (value || 0).toLocaleString('vi-VN', {
+                            maximumFractionDigits: 0,
+                        }),
+                },
+            });
+        } catch (error) {
+            console.error('Error loading room list:', error);
+
+            res.render('client/home/list-room', {
+                message: {
+                    type: 'danger',
+                    mess: 'Không thể tải danh sách phòng. Vui lòng thử lại sau.',
+                },
+                roomTypes: [],
+                rooms: [],
+                helpers: {
+                    formatMoney: (value) =>
+                        (value || 0).toLocaleString('vi-VN', {
+                            maximumFractionDigits: 0,
+                        }),
+                },
+            });
+        }
+    }
+
+    // =============== FORM THÊM PHÒNG ===============
+    static async createView(req, res) {
         const message = req.session.message;
         delete req.session.message;
 
@@ -17,9 +63,10 @@ class RoomController {
             console.error('Error loading add room form:', error);
             res.status(500).send('Internal Server Error');
         }
-    };
+    }
 
-    static store = async (req, res) => {
+    // =============== LƯU PHÒNG MỚI ===============
+    static async store(req, res) {
         const roomService = new RoomService();
         const {
             SoPhong,
@@ -34,7 +81,8 @@ class RoomController {
             MaThietBi,
         } = req.body;
 
-        let redirectPath = '/';
+        // sau khi thêm xong thì về trang /rooms
+        let redirectPath = '/rooms';
 
         try {
             if (!SoPhong || !MaLoaiPhong || !Gia) {
@@ -90,8 +138,17 @@ class RoomController {
         } catch (error) {
             console.error('Error saving room:', error);
 
+            // nếu có upload file mà lỗi thì xoá file
             if (req.file) {
-                const filePath = path.join(__dirname, '..', '..', '..', 'public', 'uploads', req.file.filename);
+                const filePath = path.join(
+                    __dirname,
+                    '..',
+                    '..',
+                    '..',
+                    'public',
+                    'uploads',
+                    req.file.filename
+                );
                 fs.unlink(filePath, (unlinkError) => {
                     if (unlinkError) {
                         console.error('Error removing uploaded file:', unlinkError);
@@ -109,7 +166,7 @@ class RoomController {
         req.session.save(() => {
             res.redirect(redirectPath);
         });
-    };
+    }
 }
 
 module.exports = RoomController;

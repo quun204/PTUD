@@ -51,16 +51,25 @@ const uploadRoomImage = (req, res, next) => {
     });
 };
 
+// Trang chủ
 router.get('/', HomeController.index);
+
+// Auth
 router.get('/login.html', HomeController.login_view);
 router.get('/register.html', HomeController.register_view);
 router.get('/xac-thuc.html', AuthController.setActiveAccount);
-
-router.get('/rooms/add', RoomController.createView);
-router.post('/rooms', uploadRoomImage, RoomController.store);
-
 router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
 router.get('/logout.html', AuthController.logout);
+
+// 🌟 Room
+// Xem danh sách phòng
+router.get('/rooms', RoomController.index);
+
+// Form thêm phòng
+router.get('/rooms/add', RoomController.createView);
+
+// Lưu phòng mới
+router.post('/rooms', uploadRoomImage, RoomController.store);
 
 module.exports = router;
